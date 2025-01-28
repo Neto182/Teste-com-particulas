@@ -21,7 +21,6 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         
-        // Configurações
         let particles = [];
         const TEXT = "LARISSA";
         const FONT_SIZE = 150;
@@ -29,26 +28,20 @@
         const MAX_SPEED = 5;
         const COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#FF9999'];
 
-        // Correção 1: Garantir que o texto seja renderizado corretamente
         function initParticles() {
             particles = [];
-            ctx.fillStyle = '#FFF'; // Cor do texto para captura
+            ctx.fillStyle = '#FFF';
             ctx.font = `${FONT_SIZE}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            
-            // Limpa o canvas antes de desenhar
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillText(TEXT, canvas.width/2, canvas.height/2);
-            
+            ctx.fillText(TEXT, canvas.width / 2, canvas.height / 2);
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imageData.data;
-            
-            // Correção 2: Verificar correta dos pixels (RGBA)
+
             for (let y = 0; y < canvas.height; y += 5) {
                 for (let x = 0; x < canvas.width; x += 5) {
                     const index = (y * canvas.width + x) * 4;
-                    // Verifica se o pixel é branco (R, G, B > 200)
                     if (data[index] > 200 && data[index + 1] > 200 && data[index + 2] > 200) {
                         particles.push({
                             x: x,
@@ -65,7 +58,6 @@
             }
         }
 
-        // Correção 3: Configurar canvas corretamente
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -74,7 +66,6 @@
             initParticles();
         }
 
-        // Restante do código mantido igual (eventos e animação)
         let lastX = 0, lastY = 0;
         let SWIPE_FORCE = 0;
 
@@ -118,12 +109,18 @@
             particles.forEach(particle => {
                 particle.x += particle.vx;
                 particle.y += particle.vy;
+
+                // Diminui a gravidade (força de retorno)
+                particle.vx += (particle.origX - particle.x) * 0.02;
+                particle.vy += (particle.origY - particle.y) * 0.02;
+
+                // Diminui o atrito, deixando as partículas mais livres
+                particle.vx *= 0.99;
+                particle.vy *= 0.99;
+
+                // Limita a velocidade máxima
                 particle.vx = Math.max(-MAX_SPEED, Math.min(particle.vx, MAX_SPEED));
                 particle.vy = Math.max(-MAX_SPEED, Math.min(particle.vy, MAX_SPEED));
-                particle.vx += (particle.origX - particle.x) * 0.1;
-                particle.vy += (particle.origY - particle.y) * 0.1;
-                particle.vx *= 0.97;
-                particle.vy *= 0.97;
                 
                 ctx.beginPath();
                 ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
@@ -134,7 +131,6 @@
             requestAnimationFrame(animate);
         }
 
-        // Inicialização correta
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
         animate();
